@@ -1,0 +1,20 @@
+app:
+  # ip白名单
+  ipWhitelist:
+    - "127.0.0.*"
+  # token超时时间
+  tokenTimeOut: 3600 # 秒数
+  # 允许多点登录(原登录不会退出)
+  allowMultipleSignIn: false
+  # 开启心跳机制
+  heartbeatEnabled: true
+  # 心跳保活时限
+  heartbeatKeepAliveTimeLimit: 30 # 秒数
+
+db:
+  backend: "mysql"
+  dsn: "root:ti999@tcp(172.18.0.5:3306)/myiot?charset=utf8mb4&loc=Local&parseTime=true"
+
+redis:
+  addr: "redis-dev.ofidc.com:6379"
+  db: 8

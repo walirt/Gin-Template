@@ -1,0 +1,746 @@
+basePath: /
+definitions:
+  constant.DeviceObject:
+    properties:
+      device_type:
+        type: integer
+      guid:
+        type: string
+      name:
+        type: string
+      node_type:
+        type: integer
+      nodes:
+        items:
+          $ref: '#/definitions/constant.PointObject'
+        type: array
+      path:
+        type: string
+      tag:
+        type: string
+    type: object
+  constant.PointObject:
+    properties:
+      abs_value:
+        type: number
+      alarm_level:
+        type: integer
+      alarm_type:
+        type: integer
+      ao_bound:
+        type: string
+      guid:
+        type: string
+      name:
+        type: string
+      node_type:
+        type: integer
+      path:
+        type: string
+      percentage:
+        type: number
+      period:
+        type: integer
+      status_map:
+        type: string
+      tag:
+        type: string
+      unit:
+        type: string
+    type: object
+  constant.Request:
+    properties:
+      data:
+        type: object
+      version:
+        type: string
+    required:
+    - data
+    - version
+    type: object
+  constant.Response:
+    properties:
+      data:
+        type: object
+      error_code:
+        type: integer
+      error_msg:
+        type: string
+    type: object
+  constant.ResponseDevicesPart:
+    properties:
+      guid:
+        type: string
+      points:
+        items:
+          $ref: '#/definitions/constant.ResponsePointsPart'
+        type: array
+      status:
+        type: integer
+    type: object
+  constant.ResponsePointsPart:
+    properties:
+      guid:
+        type: string
+      status:
+        type: integer
+      timestamp:
+        type: integer
+      value:
+        type: string
+    type: object
+  constant.SpaceObject:
+    properties:
+      guid:
+        type: string
+      name:
+        type: string
+      node_type:
+        type: integer
+      nodes:
+        items:
+          $ref: '#/definitions/constant.DeviceObject'
+        type: array
+      path:
+        type: string
+      space_type:
+        type: integer
+      tag:
+        type: string
+    type: object
+host: 127.0.0.1:8080
+info:
+  contact: {}
+  description: 北向API接口
+  license:
+    name: Apache 2.0
+  title: 北向API接口
+  version: "1.0"
+paths:
+  /north/config_get:
+    post:
+      consumes:
+      - application/json
+      description: 获取配置接口
+      parameters:
+      - description: 登录凭证
+        in: header
+        name: token
+        required: true
+        type: string
+      - description: 请求体
+        in: body
+        name: reqestBody
+        required: true
+        schema:
+          allOf:
+          - $ref: '#/definitions/constant.Request'
+          - properties:
+              data:
+                allOf:
+                - type: object
+                - properties:
+                    gzip:
+                      type: boolean
+                    version:
+                      type: string
+                  type: object
+              version:
+                type: string
+            type: object
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/constant.Response'
+            - properties:
+                data:
+                  allOf:
+                  - type: object
+                  - properties:
+                      nodes:
+                        items:
+                          $ref: '#/definitions/constant.SpaceObject'
+                        type: array
+                      version:
+                        type: string
+                    type: object
+                error_code:
+                  type: integer
+                error_msg:
+                  type: string
+              type: object
+      summary: 获取配置
+      tags:
+      - 数据
+  /north/heartbeat:
+    post:
+      consumes:
+      - application/json
+      description: 心跳接口
+      parameters:
+      - description: 登录凭证
+        in: header
+        name: token
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/constant.Response'
+            - properties:
+                data:
+                  allOf:
+                  - type: object
+                  - properties:
+                      heartbeat_time:
+                        type: string
+                    type: object
+                error_code:
+                  type: integer
+                error_msg:
+                  type: string
+              type: object
+      summary: 心跳
+      tags:
+      - 通讯
+  /north/history_data_get:
+    post:
+      consumes:
+      - application/json
+      description: 获取历史数据接口
+      parameters:
+      - description: 登录凭证
+        in: header
+        name: token
+        required: true
+        type: string
+      - description: 请求体
+        in: body
+        name: reqestBody
+        required: true
+        schema:
+          allOf:
+          - $ref: '#/definitions/constant.Request'
+          - properties:
+              data:
+                allOf:
+                - type: object
+                - properties:
+                    begin_time:
+                      type: integer
+                    end_time:
+                      type: integer
+                    point_guids:
+                      items:
+                        type: string
+                      type: array
+                  type: object
+              version:
+                type: string
+            type: object
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/constant.Response'
+            - properties:
+                data:
+                  allOf:
+                  - type: object
+                  - properties:
+                      points:
+                        items:
+                          allOf:
+                          - type: object
+                          - properties:
+                              guid:
+                                type: string
+                              tag:
+                                type: string
+                              values:
+                                items:
+                                  allOf:
+                                  - type: object
+                                  - properties:
+                                      timestamp:
+                                        type: integer
+                                      value:
+                                        type: string
+                                    type: object
+                                type: array
+                            type: object
+                        type: array
+                    type: object
+                error_code:
+                  type: integer
+                error_msg:
+                  type: string
+              type: object
+      summary: 获取历史数据
+      tags:
+      - 数据
+  /north/login:
+    post:
+      consumes:
+      - application/json
+      description: 用户登录接口
+      parameters:
+      - description: 请求体
+        in: body
+        name: reqestBody
+        required: true
+        schema:
+          allOf:
+          - $ref: '#/definitions/constant.Request'
+          - properties:
+              data:
+                allOf:
+                - type: object
+                - properties:
+                    password:
+                      type: string
+                    username:
+                      type: string
+                  type: object
+              version:
+                type: string
+            type: object
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 登录成功
+          headers:
+            Token:
+              description: 登录凭证
+              type: string
+          schema:
+            allOf:
+            - $ref: '#/definitions/constant.Response'
+            - properties:
+                data:
+                  allOf:
+                  - type: object
+                  - properties:
+                      login_time:
+                        type: string
+                      timeout:
+                        type: integer
+                    type: object
+                error_code:
+                  type: integer
+                error_msg:
+                  type: string
+              type: object
+      summary: 用户登录
+      tags:
+      - 认证
+  /north/logout:
+    post:
+      consumes:
+      - application/json
+      description: 用户登出接口
+      parameters:
+      - description: 登录凭证
+        in: header
+        name: token
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 登出成功
+          schema:
+            allOf:
+            - $ref: '#/definitions/constant.Response'
+            - properties:
+                data:
+                  allOf:
+                  - type: object
+                  - properties:
+                      logout_time:
+                        type: string
+                    type: object
+                error_code:
+                  type: integer
+                error_msg:
+                  type: string
+              type: object
+      summary: 用户登出
+      tags:
+      - 认证
+  /north/offline_data_get:
+    post:
+      consumes:
+      - application/json
+      description: 获取离线数据接口
+      parameters:
+      - description: 登录凭证
+        in: header
+        name: token
+        required: true
+        type: string
+      - description: 请求体
+        in: body
+        name: reqestBody
+        required: true
+        schema:
+          allOf:
+          - $ref: '#/definitions/constant.Request'
+          - properties:
+              data:
+                allOf:
+                - type: object
+                - properties:
+                    begin_time:
+                      type: integer
+                    end_time:
+                      type: integer
+                    strategy_id:
+                      type: integer
+                  type: object
+              version:
+                type: string
+            type: object
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/constant.Response'
+            - properties:
+                data:
+                  allOf:
+                  - type: object
+                  - properties:
+                      devices:
+                        items:
+                          $ref: '#/definitions/constant.ResponseDevicesPart'
+                        type: array
+                      strategy_id:
+                        type: integer
+                    type: object
+                error_code:
+                  type: integer
+                error_msg:
+                  type: string
+              type: object
+      summary: 获取离线数据
+      tags:
+      - 数据
+  /north/online_data_get:
+    post:
+      consumes:
+      - application/json
+      description: 获取在线数据(请求/响应)接口
+      parameters:
+      - description: 登录凭证
+        in: header
+        name: token
+        required: true
+        type: string
+      - description: 请求体
+        in: body
+        name: reqestBody
+        required: true
+        schema:
+          allOf:
+          - $ref: '#/definitions/constant.Request'
+          - properties:
+              data:
+                allOf:
+                - type: object
+                - properties:
+                    device_guids:
+                      items:
+                        type: string
+                      type: array
+                    point_guids:
+                      items:
+                        type: string
+                      type: array
+                    space_guids:
+                      items:
+                        type: string
+                      type: array
+                  type: object
+              version:
+                type: string
+            type: object
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/constant.Response'
+            - properties:
+                data:
+                  allOf:
+                  - type: object
+                  - properties:
+                      devices:
+                        items:
+                          $ref: '#/definitions/constant.ResponseDevicesPart'
+                        type: array
+                    type: object
+                error_code:
+                  type: integer
+                error_msg:
+                  type: string
+              type: object
+      summary: 获取在线数据(请求/响应)
+      tags:
+      - 数据
+  /north/online_data_strategy_add:
+    post:
+      consumes:
+      - application/json
+      description: 获取在线数据(发布/订阅) - 添加订阅策略接口
+      parameters:
+      - description: 登录凭证
+        in: header
+        name: token
+        required: true
+        type: string
+      - description: 请求体
+        in: body
+        name: reqestBody
+        required: true
+        schema:
+          allOf:
+          - $ref: '#/definitions/constant.Request'
+          - properties:
+              data:
+                allOf:
+                - type: object
+                - properties:
+                    device_guids:
+                      items:
+                        type: string
+                      type: array
+                    mode:
+                      type: integer
+                    name:
+                      type: string
+                    point_guids:
+                      items:
+                        type: string
+                      type: array
+                    space_guids:
+                      items:
+                        type: string
+                      type: array
+                  type: object
+              version:
+                type: string
+            type: object
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/constant.Response'
+            - properties:
+                data:
+                  allOf:
+                  - type: object
+                  - properties:
+                      strategy_id:
+                        type: integer
+                    type: object
+                error_code:
+                  type: integer
+                error_msg:
+                  type: string
+              type: object
+      summary: 获取在线数据(发布/订阅) - 添加订阅策略
+      tags:
+      - 数据
+  /north/online_data_strategy_del:
+    post:
+      consumes:
+      - application/json
+      description: 获取在线数据(发布/订阅) - 删除订阅策略接口
+      parameters:
+      - description: 登录凭证
+        in: header
+        name: token
+        required: true
+        type: string
+      - description: 请求体
+        in: body
+        name: reqestBody
+        required: true
+        schema:
+          allOf:
+          - $ref: '#/definitions/constant.Request'
+          - properties:
+              data:
+                allOf:
+                - type: object
+                - properties:
+                    strategy_id:
+                      type: integer
+                  type: object
+              version:
+                type: string
+            type: object
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/constant.Response'
+            - properties:
+                data:
+                  type: string
+                error_code:
+                  type: integer
+                error_msg:
+                  type: string
+              type: object
+      summary: 获取在线数据(发布/订阅) - 删除订阅策略
+      tags:
+      - 数据
+  /north/online_data_strategy_push:
+    post:
+      consumes:
+      - application/json
+      description: 获取在线数据(发布/订阅) - 推送数据(客户端侧)接口
+      parameters:
+      - description: 登录凭证
+        in: header
+        name: token
+        required: true
+        type: string
+      - description: 请求体
+        in: body
+        name: reqestBody
+        required: true
+        schema:
+          allOf:
+          - $ref: '#/definitions/constant.Response'
+          - properties:
+              data:
+                allOf:
+                - type: object
+                - properties:
+                    devices:
+                      items:
+                        $ref: '#/definitions/constant.ResponseDevicesPart'
+                      type: array
+                    strategy_id:
+                      type: integer
+                  type: object
+              version:
+                type: string
+            type: object
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/constant.Response'
+            - properties:
+                data:
+                  type: string
+                error_code:
+                  type: integer
+                error_msg:
+                  type: string
+              type: object
+      summary: 获取在线数据(发布/订阅) - 推送数据(客户端侧)
+      tags:
+      - 数据
+  /north/online_data_strategy_query:
+    post:
+      consumes:
+      - application/json
+      description: 获取在线数据(发布/订阅) - 查询订阅策略接口
+      parameters:
+      - description: 登录凭证
+        in: header
+        name: token
+        required: true
+        type: string
+      - description: 请求体
+        in: body
+        name: reqestBody
+        required: true
+        schema:
+          allOf:
+          - $ref: '#/definitions/constant.Request'
+          - properties:
+              data:
+                type: string
+              version:
+                type: string
+            type: object
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/constant.Response'
+            - properties:
+                data:
+                  allOf:
+                  - type: object
+                  - properties:
+                      strategies:
+                        items:
+                          allOf:
+                          - type: object
+                          - properties:
+                              device_guids:
+                                items:
+                                  type: string
+                                type: array
+                              mode:
+                                type: integer
+                              point_guids:
+                                items:
+                                  type: string
+                                type: array
+                              space_guids:
+                                items:
+                                  type: string
+                                type: array
+                              strategy_id:
+                                type: integer
+                            type: object
+                        type: array
+                    type: object
+                error_code:
+                  type: integer
+                error_msg:
+                  type: string
+              type: object
+      summary: 获取在线数据(发布/订阅) - 查询订阅策略
+      tags:
+      - 数据
+swagger: "2.0"
