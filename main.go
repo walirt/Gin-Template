@@ -52,7 +52,7 @@ func InitRoutes() {
 func UseMiddlewares() {
 }
 
-// InitRoutes 初始化服务
+// InitServices 初始化服务
 func InitServices() {
 	InitDb()
 	InitRedis()
